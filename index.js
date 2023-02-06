@@ -159,6 +159,7 @@ class UpdateAPK {
           })
           .catch((rej) => {
             console.log("RNUpdateAPK::downloadApk - apk info error: ", rej);
+
             this.options.onError && this.options.onError("Failed to get Downloaded APK Info");
             // re-throw so we don't attempt to install the APK, this will call the downloadApkError handler
             throw rej;
@@ -298,8 +299,8 @@ export function getUpdateInstance(options) {
     ProgressDialogModule.closeProgress();
     options.downloadApkEnd?.();
   };
-  mergedOptions.onError = () => {
-    options.onError?.();
+  mergedOptions.onError = (error) => {
+    options.onError?.(error);
   };
 
   if (!instance) {
