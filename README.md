@@ -4,6 +4,11 @@ Fork from <https://github.com/mikehardy/react-native-update-apk>
 
 ## 安装
 
+```
+yarn add https://github.com/qiqiangwu/react-native-update-apk.git
+yarn add react-native-fs
+```
+
 ### 安卓需要手动处理
 
 1. FileProviders
