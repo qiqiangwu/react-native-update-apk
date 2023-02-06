@@ -19,3 +19,4 @@ example/android/app/src/main/assets/
 android/gradle
 android/gradlew
 android/gradlew.bat
+*.tgz

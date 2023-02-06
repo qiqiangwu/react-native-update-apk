@@ -7,28 +7,63 @@
  * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
 
-import React, { Component } from "react";
+import React, {Component} from 'react';
 import {
   Alert,
   Button,
+  ImageBackground,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text
-} from "react-native";
-import * as UpdateAPK from "rn-update-apk";
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import * as UpdateAPK from 'rn-update-apk';
 
 type Props = {};
+let updater;
 export default class App extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
       // If you have something in state, you will be able to provide status to users
-      downloadProgress: -1,
+      downloadProgress: 0,
       allApps: [],
       allNonSystemApps: [],
+      updating: false,
+      contentLength: 0,
+      downloadBytes: 0,
+      status: '空闲',
     };
 
+    updater = UpdateAPK.getUpdateInstance({
+      iosAppId: '1104809018',
+      /* apkVersionUrl:
+        'https://raw.githubusercontent.com/mikehardy/react-native-update-apk/master/example/test-version.json', */
+      apkVersionUrl: 'https://www.pgyer.com/apiv2/app/check',
+      apkVersionOptions: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: '_api_key=50a4cc912047d64b14e4352ce5134e4f&appKey=e0099c1c9158312ce1d512788a320687',
+      },
+      fileProviderAuthority: 'com.example.provider',
+      pgyerVersionHandler: remote => {
+        const {data} = remote;
+        return {
+          versionName: data.buildVersion,
+          versionCode: data.buildVersionNo,
+          apkUrl: data.downloadURL,
+          forceUpdate: data.needForceUpdate,
+          whatsNew: data.buildUpdateDescription,
+        };
+      },
+    });
+
+    /*
     updater = new UpdateAPK.UpdateAPK({
 
       // iOS must use App Store and this is the app ID. This is a sample: "All Birds of Ecuador" (¡Qué lindo!)
@@ -117,24 +152,93 @@ export default class App extends Component<Props> {
         console.log("onError callback called", err);
         Alert.alert("There was an error", err.message);
       }
-    });
+    });*/
   }
 
   async componentDidMount() {
-      UpdateAPK.getApps().then(apps => {
-        console.log("Installed Apps: ", JSON.stringify(apps));
-        this.setState({ allApps: apps});
-      }).catch(e => console.log("Unable to getApps?", e));
+    UpdateAPK.getApps()
+      .then(apps => {
+        console.log('Installed Apps: ', JSON.stringify(apps));
+        this.setState({allApps: apps});
+      })
+      .catch(e => console.log('Unable to getApps?', e));
 
-      UpdateAPK.getNonSystemApps().then(apps => {
-        console.log("Installed Non-System Apps: ", JSON.stringify(apps));
-        this.setState({ allNonSystemApps: apps});
-      }).catch(e => console.log("Unable to getNonSystemApps?", e));
-    }
+    UpdateAPK.getNonSystemApps()
+      .then(apps => {
+        console.log('Installed Non-System Apps: ', JSON.stringify(apps));
+        this.setState({allNonSystemApps: apps});
+      })
+      .catch(e => console.log('Unable to getNonSystemApps?', e));
+  }
 
   _onCheckServerVersion = () => {
-    console.log("checking for update");
+    console.log('checking for update');
     updater.checkUpdate();
+  };
+
+  _onCheckServerVersionNew = () => {
+    this.setState({
+      status: '版本检查中',
+    });
+
+    UpdateAPK.getUpdateInstance({
+      iosAppId: '1104809018',
+      /* apkVersionUrl:
+        'https://raw.githubusercontent.com/mikehardy/react-native-update-apk/master/example/test-version.json', */
+      apkVersionUrl: 'https://www.pgyer.com/apiv2/app/check',
+      apkVersionOptions: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: '_api_key=50a4cc912047d64b14e4352ce5134e4f&appKey=e0099c1c9158312ce1d512788a320687',
+      },
+      fileProviderAuthority: 'com.example.provider',
+      pgyerVersionHandler: remote => {
+        const {data} = remote;
+        return {
+          versionName: data.buildVersion,
+          versionCode: data.buildVersionNo,
+          apkUrl: data.downloadURL,
+          forceUpdate: data.needForceUpdate,
+          whatsNew: data.buildUpdateDescription,
+        };
+      },
+    });
+    const inst = UpdateAPK.getUpdateInstance({
+      cancelUpdate: () => {
+        this.setState({
+          status: '空闲',
+        });
+      },
+      needUpdateApp: () => {
+        this.setState({
+          status: '需要更新',
+        });
+      },
+      downloadApkStart: () => {
+        this.setState({
+          status: '开始下载',
+        });
+      },
+      downloadApkProgress: () => {
+        this.setState({
+          status: '下载中',
+        });
+      },
+      downloadApkEnd: () => {
+        this.setState({
+          status: '下载完成',
+        });
+
+        setTimeout(() => {
+          this.setState({
+            status: '空闲',
+          });
+        }, 1000);
+      },
+    });
+    inst.checkUpdate();
   };
 
   render() {
@@ -162,19 +266,24 @@ export default class App extends Component<Props> {
           Installed Package Installer:
           {UpdateAPK.getInstalledPackageInstaller()}
         </Text>
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{flex: 1}}>
           <Text style={styles.instructions}>
             Installed Apps: {JSON.stringify(this.state.allApps, null, '\t')}
           </Text>
           <Text style={styles.instructions}>
-            Installed Non-System Apps: {JSON.stringify(this.state.allNonSystemApps, null, '\t')}
+            Installed Non-System Apps:{' '}
+            {JSON.stringify(this.state.allNonSystemApps, null, '\t')}
           </Text>
           <Text style={styles.instructions}>
             Installed Package Certificate SHA-256 Digest:
-            { UpdateAPK.getInstalledSigningInfo() ? UpdateAPK.getInstalledSigningInfo()[0].thumbprint : "" }
+            {UpdateAPK.getInstalledSigningInfo()
+              ? UpdateAPK.getInstalledSigningInfo()[0].thumbprint
+              : ''}
           </Text>
           <Text style={styles.instructions}>
-            { UpdateAPK.getInstalledSigningInfo() ? UpdateAPK.getInstalledSigningInfo()[0].toString : "" }
+            {UpdateAPK.getInstalledSigningInfo()
+              ? UpdateAPK.getInstalledSigningInfo()[0].toString
+              : ''}
           </Text>
         </ScrollView>
         {this.state.downloadProgress != -1 && (
@@ -182,10 +291,13 @@ export default class App extends Component<Props> {
             Download Progress: {this.state.downloadProgress}%
           </Text>
         )}
-        <Button
-          title="Check Server For Update"
-          onPress={this._onCheckServerVersion}
-        />
+        <Button title="检查更新" onPress={this._onCheckServerVersion} />
+        <View style={{marginTop: 10}}>
+          <Button
+            title={`检查更新提示状态 - ${this.state.status}`}
+            onPress={this._onCheckServerVersionNew}
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -194,19 +306,19 @@ export default class App extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5FCFF"
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
-    textAlign: "center",
-    margin: 10
+    textAlign: 'center',
+    margin: 10,
   },
   instructions: {
     fontSize: 12,
-    textAlign: "left",
-    color: "#333333",
-    marginBottom: 5
-  }
+    textAlign: 'left',
+    color: '#333333',
+    marginBottom: 5,
+  },
 });

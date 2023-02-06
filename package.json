@@ -32,7 +32,9 @@
   },
   "devDependencies": {
     "np": "^7.6.2",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "react": "^18.2.0",
+    "react-native": "^0.71.1"
   },
   "nativePackage": true,
   "publishConfig": {
@@ -42,5 +44,21 @@
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/mikehardy/react-native-update-apk/issues"
-  }
+  },
+  "files": [
+    "android",
+    "ios",
+    "index.js",
+    "*.podspec",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ]
 }

@@ -13,13 +13,14 @@
     "react": "18.1.0",
     "react-native": "0.70.3",
     "react-native-fs": "^2.20.0",
-    "rn-update-apk": "https://github.com/mikehardy/react-native-update-apk.git"
+    "rn-update-apk": "https://github.com/qiqiangwu/react-native-update-apk"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
+    "babel-plugin-module-resolver": "^5.0.0",
     "eslint": "^7.32.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "0.72.3",

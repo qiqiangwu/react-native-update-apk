@@ -1,6 +1,7 @@
 package net.mikehardy.rnupdateapk;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -8,14 +9,22 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.telecom.Call;
 import android.util.Log;
-import androidx.core.content.FileProvider;
 
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.FragmentActivity;
+
+import com.evm.ued.rnupdateapk.ConfirmUpdateDialog;
+import com.evm.ued.rnupdateapk.ProgressDialog;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
@@ -30,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RNUpdateAPK extends ReactContextBaseJavaModule {
-
     private final ReactApplicationContext reactContext;
 
     public RNUpdateAPK(ReactApplicationContext reactContext) {

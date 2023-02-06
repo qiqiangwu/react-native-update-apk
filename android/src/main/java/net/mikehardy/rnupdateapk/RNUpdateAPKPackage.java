@@ -1,5 +1,7 @@
 package net.mikehardy.rnupdateapk;
 
+import com.evm.ued.rnupdateapk.ConfirmUpdateModule;
+import com.evm.ued.rnupdateapk.ProgressDialogModule;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -16,6 +18,8 @@ public class RNUpdateAPKPackage implements ReactPackage {
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         return Arrays.asList(new NativeModule[]{
                 new RNUpdateAPK(reactContext),
+                new ConfirmUpdateModule(reactContext),
+                new ProgressDialogModule(reactContext),
         });
     }
 
