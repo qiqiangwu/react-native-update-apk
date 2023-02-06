@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-import { NativeModules, Platform, Alert } from "react-native";
-import semverLt from "semver/functions/lt";
+import {NativeModules, Platform, Alert} from 'react-native';
+import semverLt from 'semver/functions/lt';
 
 const RNUpdateAPK = NativeModules.RNUpdateAPK;
 const ConfirmUpdateModule = NativeModules.ConfirmUpdateModule;
@@ -21,7 +21,7 @@ class UpdateAPK {
 
   get = (url, success, error, options = {}) => {
     fetch(url, options)
-      .then((response) => {
+      .then(response => {
         if (!response.ok) {
           let message;
           if (response.statusText) {
@@ -33,11 +33,11 @@ class UpdateAPK {
         }
         return response;
       })
-      .then((response) => response.json())
-      .then((json) => {
+      .then(response => response.json())
+      .then(json => {
         success && success(json);
       })
-      .catch((err) => {
+      .catch(err => {
         error && error(err);
       });
   };
@@ -54,36 +54,44 @@ class UpdateAPK {
       this.options.apkVersionUrl,
       this.getApkVersionSuccess.bind(this),
       this.getVersionError.bind(this),
-      this.options.apkVersionOptions
+      this.options.apkVersionOptions,
     );
   };
 
-  getApkVersionSuccess = (remote) => {
-    console.debug("RNUpdateAPK::getApkVersionSuccess remote:" + JSON.stringify(remote));
+  getApkVersionSuccess = remote => {
+    console.debug(
+      'RNUpdateAPK::getApkVersionSuccess remote:' + JSON.stringify(remote),
+    );
 
     if (this.options.pgyerVersionHandler) {
       remote = this.options.pgyerVersionHandler(remote);
     }
 
-    console.debug("RNUpdateAPK::getApkVersionSuccess after handler remote:" + JSON.stringify(remote));
+    console.debug(
+      'RNUpdateAPK::getApkVersionSuccess after handler remote:' +
+        JSON.stringify(remote),
+    );
 
     // TODO switch this to versionCode
     let outdated = false;
     if (remote.versionCode && remote.versionCode > RNUpdateAPK.versionCode) {
       console.log(
-        "RNUpdateAPK::getApkVersionSuccess - outdated based on code, local/remote: " +
+        'RNUpdateAPK::getApkVersionSuccess - outdated based on code, local/remote: ' +
           RNUpdateAPK.versionCode +
-          "/" +
-          remote.versionCode
+          '/' +
+          remote.versionCode,
       );
       outdated = true;
     }
-    if (!remote.versionCode && semverLt(RNUpdateAPK.versionName, remote.versionName)) {
+    if (
+      !remote.versionCode &&
+      semverLt(RNUpdateAPK.versionName, remote.versionName)
+    ) {
       console.log(
-        "RNUpdateAPK::getApkVersionSuccess - APK outdated based on version name, local/remote: " +
+        'RNUpdateAPK::getApkVersionSuccess - APK outdated based on version name, local/remote: ' +
           RNUpdateAPK.versionName +
-          "/" +
-          remote.versionName
+          '/' +
+          remote.versionName,
       );
       outdated = true;
     }
@@ -94,7 +102,7 @@ class UpdateAPK {
         }
         this.downloadApk(remote);
       } else if (this.options.needUpdateApp) {
-        this.options.needUpdateApp((isUpdate) => {
+        this.options.needUpdateApp(isUpdate => {
           if (isUpdate) {
             this.downloadApk(remote);
           }
@@ -105,15 +113,19 @@ class UpdateAPK {
     }
   };
 
-  downloadApk = (remote) => {
-    const RNFS = require("react-native-fs");
-    const progress = (data) => {
+  downloadApk = remote => {
+    const RNFS = require('react-native-fs');
+    const progress = data => {
       const percentage = ((100 * data.bytesWritten) / data.contentLength) | 0;
       this.options.downloadApkProgress &&
-        this.options.downloadApkProgress(percentage, data.contentLength, data.bytesWritten);
+        this.options.downloadApkProgress(
+          percentage,
+          data.contentLength,
+          data.bytesWritten,
+        );
     };
-    const begin = (res) => {
-      console.log("RNUpdateAPK::downloadApk - downloadApkStart");
+    const begin = res => {
+      console.log('RNUpdateAPK::downloadApk - downloadApkStart');
       this.options.downloadApkStart && this.options.downloadApkStart();
     };
     const progressDivider = 1;
@@ -133,42 +145,61 @@ class UpdateAPK {
           background: true,
           progressDivider,
         },
-        options
-      )
+        options,
+      ),
     );
 
     jobId = ret.jobId;
 
     ret.promise
-      .then((res) => {
-        if (res["statusCode"] >= 400 && res["statusCode"] <= 599) {
-          throw "Failed to Download APK. Server returned with " + res["statusCode"] + " statusCode";
+      .then(res => {
+        if (res['statusCode'] >= 400 && res['statusCode'] <= 599) {
+          throw (
+            'Failed to Download APK. Server returned with ' +
+            res['statusCode'] +
+            ' statusCode'
+          );
         }
-        console.log("RNUpdateAPK::downloadApk - downloadApkEnd");
+        console.log('RNUpdateAPK::downloadApk - downloadApkEnd');
 
         this.options.downloadApkEnd && this.options.downloadApkEnd();
 
         RNUpdateAPK.getApkInfo(downloadDestPath)
-          .then((res) => {
-            console.log("RNUpdateAPK::downloadApk - Old Cert SHA-256: " + RNUpdateAPK.signatures[0].thumbprint);
-            console.log("RNUpdateAPK::downloadApk - New Cert SHA-256: " + res.signatures[0].thumbprint);
-            if (res.signatures[0].thumbprint !== RNUpdateAPK.signatures[0].thumbprint) {
+          .then(res => {
+            console.log(
+              'RNUpdateAPK::downloadApk - Old Cert SHA-256: ' +
+                RNUpdateAPK.signatures[0].thumbprint,
+            );
+            console.log(
+              'RNUpdateAPK::downloadApk - New Cert SHA-256: ' +
+                res.signatures[0].thumbprint,
+            );
+            if (
+              res.signatures[0].thumbprint !==
+              RNUpdateAPK.signatures[0].thumbprint
+            ) {
               // FIXME should add extra callback for this
-              console.log("The signature thumbprints seem unequal. Install will fail");
+              console.log(
+                'The signature thumbprints seem unequal. Install will fail',
+              );
             }
           })
-          .catch((rej) => {
-            console.log("RNUpdateAPK::downloadApk - apk info error: ", rej);
+          .catch(rej => {
+            console.log('RNUpdateAPK::downloadApk - apk info error: ', rej);
 
-            this.options.onError && this.options.onError("Failed to get Downloaded APK Info");
+            this.options.onError &&
+              this.options.onError('Failed to get Downloaded APK Info');
             // re-throw so we don't attempt to install the APK, this will call the downloadApkError handler
             throw rej;
           });
-        RNUpdateAPK.installApk(downloadDestPath, this.options.fileProviderAuthority);
+        RNUpdateAPK.installApk(
+          downloadDestPath,
+          this.options.fileProviderAuthority,
+        );
 
         jobId = -1;
       })
-      .catch((err) => {
+      .catch(err => {
         this.downloadApkError(err);
         jobId = -1;
       });
@@ -179,14 +210,20 @@ class UpdateAPK {
       console.log("RNUpdateAPK::getAppStoreVersion - iosAppId doesn't exist.");
       return;
     }
-    const URL = "https://itunes.apple.com/lookup?id=" + this.options.iosAppId;
-    console.log("RNUpdateAPK::getAppStoreVersion - attempting to fetch " + URL);
-    this.get(URL, this.getAppStoreVersionSuccess.bind(this), this.getVersionError.bind(this));
+    const URL = 'https://itunes.apple.com/lookup?id=' + this.options.iosAppId;
+    console.log('RNUpdateAPK::getAppStoreVersion - attempting to fetch ' + URL);
+    this.get(
+      URL,
+      this.getAppStoreVersionSuccess.bind(this),
+      this.getVersionError.bind(this),
+    );
   };
 
-  getAppStoreVersionSuccess = (data) => {
+  getAppStoreVersionSuccess = data => {
     if (data.resultCount < 1) {
-      console.log("RNUpdateAPK::getAppStoreVersionSuccess - iosAppId is wrong.");
+      console.log(
+        'RNUpdateAPK::getAppStoreVersionSuccess - iosAppId is wrong.',
+      );
       return;
     }
     const result = data.results[0];
@@ -195,13 +232,13 @@ class UpdateAPK {
 
     if (semverLt(RNUpdateAPK.versionName, version)) {
       console.log(
-        "RNUpdateAPK::getAppStoreVersionSuccess - outdated based on version name, local/remote: " +
+        'RNUpdateAPK::getAppStoreVersionSuccess - outdated based on version name, local/remote: ' +
           RNUpdateAPK.versionName +
-          "/" +
-          version
+          '/' +
+          version,
       );
       if (this.options.needUpdateApp) {
-        this.options.needUpdateApp((isUpdate) => {
+        this.options.needUpdateApp(isUpdate => {
           if (isUpdate) {
             RNUpdateAPK.installFromAppStore(trackViewUrl);
           }
@@ -212,18 +249,18 @@ class UpdateAPK {
     }
   };
 
-  getVersionError = (err) => {
-    console.log("RNUpdateAPK::getVersionError - getVersionError", err);
+  getVersionError = err => {
+    console.log('RNUpdateAPK::getVersionError - getVersionError', err);
     this.options.onError && this.options.onError(err);
   };
 
-  downloadApkError = (err) => {
-    console.log("RNUpdateAPK::downloadApkError - downloadApkError", err);
+  downloadApkError = err => {
+    console.log('RNUpdateAPK::downloadApkError - downloadApkError', err);
     this.options.onError && this.options.onError(err);
   };
 
   checkUpdate = () => {
-    if (Platform.OS === "android") {
+    if (Platform.OS === 'android') {
       this.getApkVersion();
     } else {
       this.getAppStoreVersion();
@@ -244,99 +281,85 @@ class UpdateAPK {
  * @returns
  */
 export function getUpdateInstance(options) {
-  const mergedOptions = {};
-  mergedOptions.notNeedUpdateApp = () => {
-    options.notNeedUpdateApp?.();
-  };
-  mergedOptions.needUpdateApp = (performUpdate, whatsNew) => {
-    options.needUpdateApp?.();
+  const mergedOptions = {
+    iosAppId: options.iosAppId,
+    apkVersionUrl: options.apkVersionUrl,
+    apkVersionOptions: options.apkVersionOptions || {
+      method: 'GET',
+      headers: {},
+    },
+    apkOptions: options.apkOptions || {
+      headers: {},
+    },
+    pgyerVersionHandler: options.pgyerVersionHandler,
+    fileProviderAuthority: options.fileProviderAuthority,
+    needUpdateApp: (performUpdate, whatsNew) => {
+      options.needUpdateApp?.();
 
-    showConfirm("版本升级", whatsNew ? whatsNew : "有新的版本", [
-      {
-        text: "暂不升级",
-        onPress: () => {
-          options.cancelUpdate?.();
+      showConfirm('版本升级', whatsNew ? whatsNew : '有新的版本', [
+        {
+          text: '暂不升级',
+          onPress: () => {
+            options.cancelUpdate?.();
+          },
         },
-      },
-      // Note, apps can be large. You may want to check if the network is metered (cellular data) to be nice.
-      // Note that the user will likely get a popup saying the device is set to block installs from uknown sources.
-      // ...you will need to guide them through that, maybe by explaining it here, before you call performUpdate(true);
-      {
-        text: "立即升级",
-        onPress: () => {
-          console.log("RNUpdateAPK::needUpdateApp confirmed");
-          performUpdate(true);
+        // Note, apps can be large. You may want to check if the network is metered (cellular data) to be nice.
+        // Note that the user will likely get a popup saying the device is set to block installs from uknown sources.
+        // ...you will need to guide them through that, maybe by explaining it here, before you call performUpdate(true);
+        {
+          text: '立即升级',
+          onPress: () => {
+            console.log('RNUpdateAPK::needUpdateApp confirmed');
+            performUpdate(true);
+          },
         },
-      },
-    ]);
-  };
-  if (options.forceUpdateApp) {
-    mergedOptions.forceUpdateApp = options.forceUpdateApp;
-  }
-  mergedOptions.downloadApkStart = () => {
-    showProgress();
+      ]);
+    },
+    forceUpdateApp: () => {
+      options.forceUpdateApp?.();
+    },
+    notNeedUpdateApp: () => {
+      options.notNeedUpdateApp?.();
+    },
+    downloadApkStart: () => {
+      showProgress();
 
-    options.downloadApkStart?.();
-  };
-  mergedOptions.downloadApkProgress = (progress, contentLength, bytesWritten) => {
-    console.log(`downloadApkProgress callback called - ${progress}%...`);
-    // This is your opportunity to provide feedback to users on download progress
-    // If you hae a state variable it is trivial to update the UI
+      options.downloadApkStart?.();
+    },
+    downloadApkProgress: (progress, contentLength, bytesWritten) => {
+      console.log(`downloadApkProgress callback called - ${progress}%...`);
+      // This is your opportunity to provide feedback to users on download progress
+      // If you hae a state variable it is trivial to update the UI
 
-    ProgressDialogModule.updateProgress({
-      progress: progress,
-      totalSize: contentLength,
-      downloadSize: bytesWritten,
-    });
+      ProgressDialogModule.updateProgress({
+        progress: progress,
+        totalSize: contentLength,
+        downloadSize: bytesWritten,
+      });
 
-    options.downloadApkProgress?.({
-      progress: progress,
-      totalSize: contentLength,
-      downloadSize: bytesWritten,
-    });
-  };
-  mergedOptions.downloadApkEnd = () => {
-    ProgressDialogModule.closeProgress();
-    options.downloadApkEnd?.();
-  };
-  mergedOptions.onError = (error) => {
-    options.onError?.(error);
+      options.downloadApkProgress?.({
+        progress: progress,
+        totalSize: contentLength,
+        downloadSize: bytesWritten,
+      });
+    },
+    downloadApkEnd: () => {
+      ProgressDialogModule.closeProgress();
+      options.downloadApkEnd?.();
+    },
+    onError: err => {
+      options.onError?.(error);
+    },
+    cancelUpdate: () => {
+      options.cancelUpdate?.();
+    },
   };
 
   if (!instance) {
-    if (options.fileProviderAuthority) {
-      mergedOptions.fileProviderAuthority = options.fileProviderAuthority;
-    }
-    if (options.iosAppId) {
-      mergedOptions.iosAppId = options.iosAppId;
-    }
-    if (options.apkVersionUrl) {
-      mergedOptions.apkVersionUrl = options.apkVersionUrl;
-    }
-    if (options.pgyerVersionHandler) {
-      mergedOptions.pgyerVersionHandler = options.pgyerVersionHandler;
-    }
-    if (options.apkOptions) {
-      mergedOptions.apkOptions = options.apkOptions;
-    } else {
-      mergedOptions.apkOptions = {
-        headers: {},
-      };
-    }
-    if (options.apkVersionOptions) {
-      mergedOptions.apkVersionOptions = options.apkVersionOptions;
-    } else {
-      mergedOptions.apkVersionOptions = {
-        method: "GET",
-        headers: {},
-      };
-    }
-
     instance = new UpdateAPK(mergedOptions);
   } else {
     instance.setOptions(mergedOptions);
   }
-
   return instance;
 }
 
@@ -362,14 +385,14 @@ export function getInstalledSigningInfo() {
   return RNUpdateAPK.signatures;
 }
 export async function getApps() {
-  if (Platform.OS === "android") {
+  if (Platform.OS === 'android') {
     return RNUpdateAPK.getApps();
   } else {
     return Promise.resolve([]);
   }
 }
 export async function getNonSystemApps() {
-  if (Platform.OS === "android") {
+  if (Platform.OS === 'android') {
     return RNUpdateAPK.getNonSystemApps();
   } else {
     return Promise.resolve([]);
@@ -377,17 +400,17 @@ export async function getNonSystemApps() {
 }
 
 function showConfirm(title, message, buttons, options) {
-  if (Platform.OS === "ios") {
-    Alert.prompt(title, message, buttons, "default");
-  } else if (Platform.OS === "android") {
+  if (Platform.OS === 'ios') {
+    Alert.prompt(title, message, buttons, 'default');
+  } else if (Platform.OS === 'android') {
     if (!ConfirmUpdateModule) {
       return;
     }
     const constants = ConfirmUpdateModule.getConstants();
 
     const config = {
-      title: title || "",
-      message: message || "",
+      title: title || '',
+      message: message || '',
     };
 
     if (options && options.cancelable) {
@@ -395,13 +418,15 @@ function showConfirm(title, message, buttons, options) {
     }
     // At most three buttons (neutral, negative, positive). Ignore rest.
     // The text 'OK' should be probably localized. iOS Alert does that in native.
-    const defaultPositiveText = "OK";
-    const validButtons = buttons ? buttons.slice(0, 2) : [{ text: defaultPositiveText }];
+    const defaultPositiveText = 'OK';
+    const validButtons = buttons
+      ? buttons.slice(0, 2)
+      : [{text: defaultPositiveText}];
     const buttonPositive = validButtons.pop();
     const buttonNegative = validButtons.pop();
 
     if (buttonNegative) {
-      config.buttonNegative = buttonNegative.text || "";
+      config.buttonNegative = buttonNegative.text || '';
     }
     if (buttonPositive) {
       config.buttonPositive = buttonPositive.text || defaultPositiveText;
@@ -418,22 +443,22 @@ function showConfirm(title, message, buttons, options) {
         options && options.onDismiss && options.onDismiss();
       }
     };
-    const onError = (errorMessage) => console.warn(errorMessage);
+    const onError = errorMessage => console.warn(errorMessage);
 
-    console.debug("RNUpdateAPK::showConfirm 请求打开更新确认对话框");
+    console.debug('RNUpdateAPK::showConfirm 请求打开更新确认对话框');
     ConfirmUpdateModule.showConfirm(config, onError, onAction);
   }
 }
 
 function showProgress() {
-  if (Platform.OS === "ios") {
+  if (Platform.OS === 'ios') {
     return;
-  } else if (Platform.OS === "android") {
+  } else if (Platform.OS === 'android') {
     if (!ProgressDialogModule) {
       return;
     }
 
-    const onError = (errorMessage) => console.warn(errorMessage);
+    const onError = errorMessage => console.warn(errorMessage);
     ProgressDialogModule.showProgress({}, onError);
   }
 }

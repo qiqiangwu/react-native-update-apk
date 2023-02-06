@@ -181,31 +181,9 @@ export default class App extends Component<Props> {
       status: '版本检查中',
     });
 
-    UpdateAPK.getUpdateInstance({
-      iosAppId: '1104809018',
-      /* apkVersionUrl:
-        'https://raw.githubusercontent.com/mikehardy/react-native-update-apk/master/example/test-version.json', */
-      apkVersionUrl: 'https://www.pgyer.com/apiv2/app/check',
-      apkVersionOptions: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: '_api_key=50a4cc912047d64b14e4352ce5134e4f&appKey=e0099c1c9158312ce1d512788a320687',
-      },
-      fileProviderAuthority: 'com.example.provider',
-      pgyerVersionHandler: remote => {
-        const {data} = remote;
-        return {
-          versionName: data.buildVersion,
-          versionCode: data.buildVersionNo,
-          apkUrl: data.downloadURL,
-          forceUpdate: data.needForceUpdate,
-          whatsNew: data.buildUpdateDescription,
-        };
-      },
-    });
+    const options = updater.options;
     const inst = UpdateAPK.getUpdateInstance({
+      ...options,
       cancelUpdate: () => {
         this.setState({
           status: '空闲',
