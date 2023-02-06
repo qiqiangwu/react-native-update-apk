@@ -37,12 +37,11 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
     /* package */ static final String KEY_BUTTON_NEGATIVE = "buttonNegative";
     /* package */ static final String KEY_CANCELABLE = "cancelable";
 
-    /* package */ static final Map<String, Object> CONSTANTS =
-            MapBuilder.<String, Object>of(
-                    ACTION_BUTTON_CLICKED, ACTION_BUTTON_CLICKED,
-                    ACTION_DISMISSED, ACTION_DISMISSED,
-                    KEY_BUTTON_POSITIVE, DialogInterface.BUTTON_POSITIVE,
-                    KEY_BUTTON_NEGATIVE, DialogInterface.BUTTON_NEGATIVE);
+    /* package */ static final Map<String, Object> CONSTANTS = MapBuilder.<String, Object>of(
+            ACTION_BUTTON_CLICKED, ACTION_BUTTON_CLICKED,
+            ACTION_DISMISSED, ACTION_DISMISSED,
+            KEY_BUTTON_POSITIVE, DialogInterface.BUTTON_POSITIVE,
+            KEY_BUTTON_NEGATIVE, DialogInterface.BUTTON_NEGATIVE);
 
     private boolean mIsInForeground;
 
@@ -92,11 +91,8 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
     }
 
     class FragmentManagerHelper {
-        private final @NonNull
-        FragmentManager mFragmentManager;
-        private @Nullable
-        Object mFragmentToShow;
-
+        private final @NonNull FragmentManager mFragmentManager;
+        private @Nullable Object mFragmentToShow;
 
         public FragmentManagerHelper(@NonNull FragmentManager fragmentManager) {
             mFragmentManager = fragmentManager;
@@ -121,7 +117,8 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
                 return;
             }
 
-            ConfirmUpdateDialog oldFragment = (ConfirmUpdateDialog) mFragmentManager.findFragmentByTag(ConfirmUpdateDialog.FRAGMENT_TAG);
+            ConfirmUpdateDialog oldFragment = (ConfirmUpdateDialog) mFragmentManager
+                    .findFragmentByTag(ConfirmUpdateDialog.FRAGMENT_TAG);
             if (oldFragment != null && oldFragment.isResumed()) {
                 oldFragment.dismiss();
             }
@@ -133,10 +130,13 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
 
             dismissExisting();
 
-            ConfirmUpdateDialogListener actionListener = actionCallback != null ? new ConfirmUpdateDialogListener(actionCallback) : null;
+            ConfirmUpdateDialogListener actionListener = actionCallback != null
+                    ? new ConfirmUpdateDialogListener(actionCallback)
+                    : null;
             ConfirmUpdateDialog fragment = new ConfirmUpdateDialog(actionListener, args);
 
             if (mIsInForeground && !mFragmentManager.isStateSaved()) {
+                fragment.setCancelable(false);
                 fragment.show(mFragmentManager, ConfirmUpdateDialog.FRAGMENT_TAG);
             } else {
                 mFragmentToShow = fragment;
@@ -188,7 +188,8 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
 
         Log.d(NAME, "onHostResume()");
 
-        // Check if a dialog has been created while the host was paused, so that we can show it now.
+        // Check if a dialog has been created while the host was paused, so that we can
+        // show it now.
         ConfirmUpdateModule.FragmentManagerHelper fragmentManagerHelper = getFragmentManagerHelper();
         if (fragmentManagerHelper != null) {
             fragmentManagerHelper.showPendingConfirm();
@@ -210,14 +211,16 @@ public class ConfirmUpdateModule extends ReactContextBaseJavaModule implements L
     }
 
     /**
-     * Creates a new helper to work with FragmentManager. Returns null if we're not attached to an
+     * Creates a new helper to work with FragmentManager. Returns null if we're not
+     * attached to an
      * Activity.
      *
-     * <p>DO NOT HOLD LONG-LIVED REFERENCES TO THE OBJECT RETURNED BY THIS METHOD, AS THIS WILL CAUSE
+     * <p>
+     * DO NOT HOLD LONG-LIVED REFERENCES TO THE OBJECT RETURNED BY THIS METHOD, AS
+     * THIS WILL CAUSE
      * MEMORY LEAKS.
      */
-    private @Nullable
-    ConfirmUpdateModule.FragmentManagerHelper getFragmentManagerHelper() {
+    private @Nullable ConfirmUpdateModule.FragmentManagerHelper getFragmentManagerHelper() {
         Activity activity = getCurrentActivity();
         if (activity == null || !(activity instanceof FragmentActivity)) {
             Log.d(NAME, "getFragmentManagerHelper: " + "current activity is null or not instance of FragmentActivity");
