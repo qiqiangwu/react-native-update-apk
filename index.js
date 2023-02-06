@@ -163,8 +163,7 @@ class UpdateAPK {
             // re-throw so we don't attempt to install the APK, this will call the downloadApkError handler
             throw rej;
           });
-        // TODO: 测试取消安装APK
-        /* RNUpdateAPK.installApk(downloadDestPath, this.options.fileProviderAuthority); */
+        RNUpdateAPK.installApk(downloadDestPath, this.options.fileProviderAuthority);
 
         jobId = -1;
       })
