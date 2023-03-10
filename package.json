@@ -1,6 +1,6 @@
 {
-  "name": "rn-update-apk",
-  "version": "5.0.0",
+  "name": "@evm/rn-update-apk",
+  "version": "0.0.7",
   "description": "Check for new APK versions and update app from React Native",
   "main": "index.js",
   "repository": {
@@ -37,9 +37,6 @@
     "react-native": "^0.71.1"
   },
   "nativePackage": true,
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "homepage": "https://github.com/mikehardy/react-native-update-apk",
   "readmeFilename": "README.md",
   "bugs": {
@@ -49,6 +46,7 @@
     "android",
     "ios",
     "index.js",
+    "index.d.ts",
     "*.podspec",
     "!ios/build",
     "!android/build",

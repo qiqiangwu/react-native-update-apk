@@ -20,3 +20,4 @@ android/gradle
 android/gradlew
 android/gradlew.bat
 *.tgz
+.svn

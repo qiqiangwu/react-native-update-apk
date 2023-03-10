@@ -3,6 +3,7 @@ xcuserdata
 build/
 *.iml
 npm-debug.log
+node_modules
 example
 refresh-example.sh
 release-example.sh
